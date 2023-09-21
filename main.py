@@ -37,7 +37,22 @@ def main():
     print("Rebuilding tag index...")
     conn.cursor().execute("""
             CREATE INDEX IF NOT EXISTS tag_string_idx ON posts USING GIN (string_to_array(tag_string, ' '));
-        """)            
+        """)      
+    conn.commit()
+    print("Adding to changelog...")
+    conn.cursor().execute("""
+        CREATE TABLE IF NOT EXISTS changelog (
+            id             INT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+            processed_date TIMESTAMP NOT NULL,
+            last_update    TIMESTAMP NOT NULL,
+            last_post_id   INT NOT NULL,
+            total_posts    INT NOT NULL
+        );
+        """)
+    conn.cursor().execute("""
+        INSERT INTO changelog (processed_date, last_update, last_post_id, total_posts)
+        VALUES (CURRENT_TIMESTAMP, (SELECT MAX(updated_at) FROM posts), (SELECT MAX(id) FROM posts), (SELECT COUNT(*) FROM posts));
+        """)
     conn.commit()
     conn.close()
     print("Done.")
