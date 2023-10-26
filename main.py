@@ -66,7 +66,7 @@ def download_csv_files(tables):
     # Create download directory if it doesn't exist
     Path(DOWNLOAD_BASE_DIR).mkdir(parents=True, exist_ok=True)
 
-    # Download and decompress csv for each table
+    # Download each table
     credentials = base64.b64encode(f"{USERNAME}:{API_KEY}".encode("ascii"))
     basic_auth = f"Basic {credentials}"
 
